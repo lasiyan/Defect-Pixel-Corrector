@@ -1,7 +1,7 @@
 #pragma once
 
 #include "MyImage.h"
-#define MASK_SIZE 5
+#define MASK_SIZE 3
 
 class Pixel {
 
