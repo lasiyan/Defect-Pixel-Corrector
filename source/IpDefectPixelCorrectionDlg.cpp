@@ -7,7 +7,7 @@
 #include "IpDefectPixelCorrectionDlg.h"
 #include "MyImage.h"
 #include "IpActivity.h"
-
+#include "ResultDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -56,7 +56,6 @@ CIpDefectPixelCorrectionDlg::CIpDefectPixelCorrectionDlg(CWnd* pParent /*=NULL*/
 	, m_edInputType(_T(""))
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-	pDlg = NULL;
 }
 
 void CIpDefectPixelCorrectionDlg::DoDataExchange(CDataExchange* pDX)
@@ -115,11 +114,6 @@ BOOL CIpDefectPixelCorrectionDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	// TODO: Add extra initialization here
-	screenX = GetSystemMetrics(SM_CXSCREEN);
-	screenY = GetSystemMetrics(SM_CYSCREEN);
-	screenX = screenX / 2 + 50;
-	screenY = screenY / 2 - 50;
-
 	m_ctrlHotSlider.SetRange(0, 255);
 	m_crtlDeadSlider.SetRange(0, 255);
 	m_ctrlHotSlider.SetPos(255);
@@ -179,6 +173,8 @@ HCURSOR CIpDefectPixelCorrectionDlg::OnQueryDragIcon()
 }
 void CIpDefectPixelCorrectionDlg::OnCbnSelchangeOutputlist(){}
 
+
+// File Open Dialog
 void CIpDefectPixelCorrectionDlg::OnBnClickedFileopen()
 {
 	// Open File Dialog
@@ -187,9 +183,9 @@ void CIpDefectPixelCorrectionDlg::OnBnClickedFileopen()
 
 	if(dlg.DoModal() == IDOK)
 	{
-		m_edFilePath = dlg.GetPathName();		
-		UpdateData(FALSE);
-		// get picture-control dc
+		m_edFilePath = dlg.GetPathName();
+
+		HBITMAP hBitmap;
 		if((hBitmap = (HBITMAP)LoadImage(NULL, m_edFilePath, IMAGE_BITMAP, 0, 0,
 			LR_LOADFROMFILE | LR_CREATEDIBSECTION | LR_DEFAULTSIZE)) == NULL)
 		{
@@ -198,7 +194,8 @@ void CIpDefectPixelCorrectionDlg::OnBnClickedFileopen()
 		}
 		else
 		{
-			pBitmap = CBitmap::FromHandle(hBitmap);
+			CBitmap *pBitmap = CBitmap::FromHandle(hBitmap);
+			BITMAP Bitmap;
 			pBitmap->GetBitmap(&Bitmap);
 
 			m_width = Bitmap.bmWidth;
@@ -207,21 +204,29 @@ void CIpDefectPixelCorrectionDlg::OnBnClickedFileopen()
 
 			MakeImageOutputList(m_bitCount);
 		}
+		DeleteObject(hBitmap);
+		hBitmap = NULL;
 	}
 }
+
+// Start Defect Pixel Correction Processing
 void CIpDefectPixelCorrectionDlg::OnBnClickedCorrection()
 {
+	g_cor.clear();
+
 	if(m_ctrlHotSlider.GetPos() < 200)
 	{
 		if(MessageBox(
 			_T("If you set Hot Pixel value less 200, the Correction will take a long time\r\nContinue?"),
-			_T("Warning !"), MB_YESNO) == IDNO)	return;
+			_T("Warning !"), MB_YESNO) == IDNO)
+			return;
 	}
 	else if(m_crtlDeadSlider.GetPos() > 50)
 	{
 		if(MessageBox(
 			_T("If you set Dead Pixel value over 50, the Correction will take a long time\r\nContinue?"),
-			_T("Warning !"), MB_YESNO) == IDNO) return;
+			_T("Warning !"), MB_YESNO) == IDNO)
+			return;
 	}
 
 	CMyImage* pFile = new CMyImage(m_edFilePath, m_width, m_height, m_bitCount);
@@ -229,7 +234,7 @@ void CIpDefectPixelCorrectionDlg::OnBnClickedCorrection()
 		m_outputList.GetCurSel(),
 		GetDlgItemInt(IDC_HOTVALUE),
 		GetDlgItemInt(IDC_DEADVALUE)
-	);
+		);
 
 	if(!activity.Execute(pFile))
 	{
@@ -240,18 +245,18 @@ void CIpDefectPixelCorrectionDlg::OnBnClickedCorrection()
 	{
 		ResultDialogShow();
 	}
+	
 }
 
 void CIpDefectPixelCorrectionDlg::ResultDialogShow()
 {
-	pDlg = new CResultDlg(this);  
+	CResultDlg *pDlg = new CResultDlg();  
 
 	if ( pDlg )  
 	{  
-		int height = ((g_cor.size() * 23) > 100) ? (g_cor.size() * 23) : 100;
 		pDlg->Create( IDD_RESULT_DIALOG );
 		pDlg->ShowWindow( SW_SHOW );
-		pDlg->MoveWindow(screenX,screenY,256,height);
+		pDlg->MoveWindow(912,279,273,400);	// case by case
 	}
 }
 
@@ -286,9 +291,6 @@ void CIpDefectPixelCorrectionDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar*
 	{
 		SetDlgItemInt(IDC_HOTVALUE, m_ctrlHotSlider.GetPos());
 	}
-
-	CDialog::OnHScroll(nSBCode, nPos, pScrollBar);
-
 	if(pScrollBar != NULL && pScrollBar->m_hWnd == m_crtlDeadSlider.m_hWnd)
 	{		
 		SetDlgItemInt(IDC_DEADVALUE, m_crtlDeadSlider.GetPos());
@@ -305,8 +307,7 @@ void CIpDefectPixelCorrectionDlg::OnEnChangeHotvalue()
 		AfxMessageBox(_T("Max Value is 255"));
 		SetDlgItemInt(IDC_HOTVALUE, 255);
 		val = 255;
-	}
-	
+	}	
 	m_ctrlHotSlider.SetPos(val);
 }
 
@@ -319,6 +320,5 @@ void CIpDefectPixelCorrectionDlg::OnEnChangeDeadvalue()
 		SetDlgItemInt(IDC_DEADVALUE, 255);
 		val = 255;
 	}
-
 	m_crtlDeadSlider.SetPos(val);
 }

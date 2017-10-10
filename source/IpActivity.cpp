@@ -16,7 +16,7 @@ BOOL CIpActivity::Execute(CMyImage* pFile)
 	CPixelProcessing Processing(pFile, nOutputType, nHotValue, nDeadValue);
 	pResult = Processing.start(pFile->GetPixels2D());
 	delete(pFile);
-	
+
 	// 3. Save File
 	if(!SaveFile(pResult))
 	{
@@ -49,8 +49,8 @@ BOOL CIpActivity::LoadFile(CMyImage *pFile)
 		fseek(fp, sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER), SEEK_SET);
 		fread(pFile->GetPixels(), 3, pFile->GetImageSize(), fp);
 	}
-
 	fclose(fp);
+
 	return TRUE;
 }
 

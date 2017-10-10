@@ -3,7 +3,6 @@
 //
 
 #pragma once
-#include "ResultDlg.h"
 #include "afxwin.h"
 #include "afxcmn.h"
 
@@ -46,19 +45,10 @@ public:
 	afx_msg void OnEnChangeDeadvalue();
 
 private:
-	int screenX;
-	int screenY;
-
-	HBITMAP hBitmap;
-	CBitmap *pBitmap;
-	BITMAP Bitmap;
-
 	int m_width;
 	int m_height;
 	int m_bitCount;
-
-	CResultDlg *pDlg;
-
+	
 	void MakeImageOutputList(int);
 	void ResultDialogShow();
 };

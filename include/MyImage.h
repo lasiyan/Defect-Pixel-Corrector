@@ -168,28 +168,75 @@ public:
 	}
 };
 
-// Useful Method Implement
+/**************************************************
+*
+*	Inline Methods List
+*
+*	1. Limit : For check over 255 or less 0
+*	2. RGBto8BitGray
+*	3. ReverseImage
+*	4. CreateImage
+*	5. DestroyImage
+*
+***************************************************/
 inline BYTE Limit(const BYTE& value)
 {
 	return ((value > 255) ? 255 : ((value < 0) ? 0 : value));
 }
 
-inline void RGBto8BitGray(BYTE** sz8Bit, BYTE** sz24Bit, int nWidth, int nHeight)
+template<typename T>
+inline void ReverseImage(T** _ary, int _w, int _h)
 {
-	int k;
-	int gray;
-	for(int j = 0; j < nHeight; j++)
+	int _h_half = _h / 2;
+	for(int j = 0; j < _h_half; j++)
 	{
-		for(int i = 0; i < nWidth; i++)
+		for(int i = 0; i < _w; i++)
+		{
+			swap(_ary[j][i], _ary[(_h-1) - j][i]);
+		}
+	}
+}
+
+inline void CreateImage(BYTE**& ary, int width, int height, int bit)
+{
+	width = width * bit / 8 ;
+	ary = new BYTE*[ height ];
+	ary[0] = new BYTE[ width * height ];
+
+	for(int i = 1; i < height; i++)
+	{
+		ary[i] = ary[ i - 1 ] + width;
+	}
+	ZeroMemory(ary[0], width * height);
+}
+inline void DestroyImage(BYTE**& ary)
+{
+	if(ary != NULL)
+	{
+		delete[] ary[0];
+		delete[] ary;
+		ary[0] = NULL;
+		ary = NULL;
+	}
+}
+
+inline void RGB_to_Gray(BYTE**& bit8, BYTE**& bit24, int width, int height)
+{
+	CreateImage(bit8, width, height, 8);
+
+	int k, gray;
+	for(int j = 0; j < height; j++)
+	{
+		for(int i = 0; i < width; i++)
 		{
 			k = i * 3;
 			gray = (
-			sz24Bit[j][k] +	// B
-			sz24Bit[j][k+1] +	// G
-			sz24Bit[j][k+2]	// R
+				bit24[j][k] +	// B
+				bit24[j][k+1] +	// G
+				bit24[j][k+2]	// R
 			) / 3;
-			
-			sz8Bit[j][i] = (BYTE)gray;
+
+			bit8[j][i] = (BYTE)gray;
 		}
 	}
 }

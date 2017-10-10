@@ -47,19 +47,22 @@ using namespace std;
 #define HOT_PIXEL	1
 class _Point {
 public:
-	_Point(int _x, int _y, int _state) {	// on init
+	_Point(int _x, int _y, int _state, BYTE _val) {	// on init
 		x = _x;
 		y = _y;
 		state = _state;
+		val = _val;
 	}
-	void Set(int _x, int _y, int _state) {	// setting
+	void Set(int _x, int _y, int _state, BYTE _val) {	// setting
 		x = _x;
 		y = _y;
 		state = _state;
+		val = _val;
 	}
 	int x;
 	int y;
 	BOOL state;
+	BYTE val;
 };
 extern vector<_Point> g_cor;	// Result's vector
 
