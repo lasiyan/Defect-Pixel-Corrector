@@ -6,7 +6,7 @@ Defect Pixel Correction based on median Filter processing. This Application made
 
 ## 개발 환경
 
-* OS : Windows 10 Pro 64bit
+* OS : Windows 10 Pro 64bit (App: 32bit)
 * CPU : Intel(R) Core(TM) i7-6500U CPU @ 2.50GHz 2.59 GHz
 * RAM : 8.00GB
 * IDE : Microsoft Visual Studio 2008 Version 9.0.30729.1 SP
